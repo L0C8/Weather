@@ -1,7 +1,7 @@
+from utils import check_runtime_environment
 from gui import WeatherAppGUI
 
 if __name__ == "__main__":
-    # utils run boot
-    # code here
+    check_runtime_environment()
     app = WeatherAppGUI()
     app.run()
