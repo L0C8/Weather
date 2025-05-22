@@ -1,30 +1,23 @@
-import customtkinter as ctk
-from utils import get_theme_data, get_saved_theme
+import tkinter as tk
+from tkinter import ttk
+from services import fetch_weather
 
-class WeatherAppGUI:
-    def __init__(self, theme_name="Dark"):
-        self.theme_name = get_saved_theme()
-        self.theme = get_theme_data(self.theme_name)
+class WeatherAppGUI(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Weather App")
+        self.geometry("300x200")
+        self.configure(bg="#ffffff")
 
-        ctk.set_appearance_mode("System")
-        self.root = ctk.CTk()
-        self.root.geometry("320x240")
-        self.root.title("Theme Test")
+        self.label = tk.Label(self, text="Weather Info:", bg="#ffffff", fg="#000000")
+        self.label.pack(pady=10)
 
-        self.frame = ctk.CTkFrame(self.root, fg_color=self.theme.get("bg", "#ffffff"), corner_radius=0)
-        self.frame.pack(fill="both", expand=True)
+        self.result_label = tk.Label(self, text="", bg="#ffffff", fg="#000000", wraplength=280, justify="left")
+        self.result_label.pack(pady=10)
 
-        self.label = ctk.CTkLabel(
-            self.frame,
-            text=f"Loaded Theme: {self.theme_name}",
-            text_color=self.theme.get("fg", "#000000"),
-            corner_radius=0
-        )
-        self.label.pack(pady=100)
+        self.fetch_button = ttk.Button(self, text="Fetch Weather", command=self.call_fetch_weather)
+        self.fetch_button.pack(pady=10)
 
-    def run(self):
-        self.root.mainloop()
-
-if __name__ == "__main__":
-    app = WeatherAppGUI()  
-    app.run()
+    def call_fetch_weather(self):
+        result = fetch_weather()
+        self.result_label.config(text=result)
