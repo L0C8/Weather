@@ -3,6 +3,7 @@ import configparser
 
 THEME_FILE_PATH = "data/themes.ini"
 SETTINGS_FILE_PATH = "data/settings.ini"
+API_KEY_FILE = "data/api_keys.ini"
 
 def check_runtime_environment():
     ensure_theme_file()
@@ -73,3 +74,8 @@ def get_theme_data(theme_name):
     if theme_name in config:
         return dict(config[theme_name])
     return {}
+
+def get_api_key(service_name):
+    config = configparser.ConfigParser()
+    config.read(API_KEY_FILE)
+    return config.get(service_name, "key", fallback=None)
