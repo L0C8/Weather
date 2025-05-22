@@ -77,6 +77,5 @@ def get_theme_data(theme_name):
 
 def get_api_key(service_name):
     config = configparser.ConfigParser()
-    if not config.read(API_KEY_FILE):
-        return None
-    return config.get("keys", service_name, fallback=None)
+    config.read(API_KEY_FILE)
+    return config.get(service_name, "key", fallback=None)

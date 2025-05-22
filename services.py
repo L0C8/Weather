@@ -5,43 +5,46 @@ import time
 from utils import get_api_key
 
 WEATHER_CACHE_FILE = os.path.join("data", "cached_weather.json")
-WEATHER_CACHE_DURATION = 15 * 60  # 15 minutes
+WEATHER_CACHE_DURATION = 15 * 60
 
 def fetch_weather():
     api_key = get_api_key("openweathermap")
+    print(f"Using API key: {api_key}")
     if not api_key:
         return "Missing OpenWeatherMap API key."
 
-    location = get_user_location()
-    if not location or "loc" not in location:
-        return "Unable to determine location."
-
-    loc = location["loc"]
-    city = location.get("city", "Unknown")
-    country = location.get("country", "Unknown")
-    lat, lon = loc.split(",")
-
-    if os.path.exists(WEATHER_CACHE_FILE):
-        with open(WEATHER_CACHE_FILE, "r") as f:
-            cached = json.load(f)
-            if (
-                time.time() - cached.get("timestamp", 0) < WEATHER_CACHE_DURATION
-                and cached.get("location") == loc
-            ):
-                return format_weather(cached["data"])
-
     try:
+        geo = requests.get("https://ipinfo.io/json").json()
+        loc = geo.get("loc", "")
+        city = geo.get("city", "Unknown")
+        country = geo.get("country", "Unknown")
+
+        if not loc:
+            return "Could not determine location."
+
+        lat, lon = loc.split(",")
+
+        if os.path.exists(WEATHER_CACHE_FILE):
+            with open(WEATHER_CACHE_FILE, "r") as f:
+                cached = json.load(f)
+                if (
+                    time.time() - cached.get("timestamp", 0) < WEATHER_CACHE_DURATION
+                    and cached.get("location") == loc
+                ):
+                    return format_weather(cached["data"])
+
         url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
-        data = requests.get(url).json()
+        response = requests.get(url)
+        data = response.json()
 
         if data.get("cod") != 200:
-            return f"Weather error: {data.get('message', 'Unknown error')}"
+            return f"Weather error: {data.get('message', 'unknown error')}"
 
-        # Save to cache
         with open(WEATHER_CACHE_FILE, "w") as f:
             json.dump({"timestamp": time.time(), "location": loc, "data": data}, f)
 
         return format_weather(data)
+
     except Exception as e:
         return f"Weather error: {e}"
 
