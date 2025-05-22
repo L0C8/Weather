@@ -62,7 +62,14 @@ headline = #bf360c
 
 def get_saved_theme():
     if not os.path.exists(SETTINGS_FILE_PATH):
-        return "Dark"
+        return "Dark" 
     config = configparser.ConfigParser()
     config.read(SETTINGS_FILE_PATH)
     return config.get("User", "theme", fallback="Dark")
+
+def get_theme_data(theme_name):
+    config = configparser.ConfigParser()
+    config.read(THEME_FILE_PATH)
+    if theme_name in config:
+        return dict(config[theme_name])
+    return {}
