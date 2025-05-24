@@ -3,6 +3,8 @@ import os
 import json
 import time
 from utils import get_api_key
+from datetime import datetime
+import pytz
 
 WEATHER_CACHE_FILE = os.path.join("data", "cached_weather.json")
 WEATHER_CACHE_DURATION = 15 * 60
@@ -48,25 +50,21 @@ def fetch_weather():
     except Exception as e:
         return f"Weather error: {e}"
 
+def get_timezone_and_time():
+    try:
+        geo = requests.get("https://ipinfo.io/json").json()
+        timezone = geo.get("timezone")
+        if not timezone:
+            return "Unknown timezone"
+        local_time = datetime.now(pytz.timezone(timezone)).strftime("%Y-%m-%d %H:%M:%S")
+        print(local_time)
+        return f"Timezone: {timezone}, Local time: {local_time}"
+    except Exception as e:
+        return f"Timezone error: {e}"
+
 def format_weather(data):
     city = data.get("name", "Unknown")
     country = data.get("sys", {}).get("country", "")
     temp = data.get("main", {}).get("temp", "?")
     desc = data.get("weather", [{}])[0].get("description", "no data")
     return f"{city}, {country}: {temp}°C, {desc.capitalize()}"
-
-def get_user_location():
-    try:
-        ipinfo_cache = "data/cached_ipinfo.json"
-        if os.path.exists(ipinfo_cache):
-            with open(ipinfo_cache, "r") as f:
-                cached = json.load(f)
-                if time.time() - cached.get("timestamp", 0) < 3 * 60 * 60:
-                    return cached.get("geo", {})
-
-        geo = requests.get("https://ipinfo.io/json").json()
-        with open(ipinfo_cache, "w") as f:
-            json.dump({"timestamp": time.time(), "geo": geo}, f)
-        return geo
-    except Exception:
-        return {}

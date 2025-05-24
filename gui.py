@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from services import fetch_weather
+from services import fetch_weather, get_timezone_and_time
 
 class WeatherAppGUI(tk.Tk):
     def __init__(self):
@@ -20,4 +20,5 @@ class WeatherAppGUI(tk.Tk):
 
     def call_fetch_weather(self):
         result = fetch_weather()
+        get_timezone_and_time()
         self.result_label.config(text=result)
